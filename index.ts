@@ -1,45 +1,67 @@
 #!/usr/bin/env node
-import blessed from 'blessed';
+import path from 'path';
+import glob from 'glob';
+import fs from 'fs-extra';
+import yargs from 'yargs';
+import Mustache from 'mustache';
 
-const screen = blessed.screen({
-  smartCSR: true,
-});
+import inquirer from 'inquirer';
 
-screen.title = 'my window title';
-
-// Create a box perfectly centered horizontally and vertically.
-var box = blessed.box({
-  top: 'center',
-  left: 'center',
-  width: '50%',
-  height: '50%',
-  content: 'Hello {bold}world{/bold}!',
-  tags: true,
-  border: {
-    type: 'line',
-  },
-  style: {
-    fg: 'white',
-    bg: 'magenta',
-    border: {
-      fg: '#f0f0f0',
+// directory is current directory by default
+const getParametersInTemplates = (dir: string = './') => {
+  // Get all files under globPath
+  const globPath = path.resolve(dir, '**');
+  glob(
+    globPath,
+    {
+      dot: true,
+      ignore: ['**/node_modules/**', '**/.git/**'],
+      nodir: true,
     },
-    hover: {
-      bg: 'green',
+    function(er, templateFiles) {
+      console.log('Got template files', templateFiles);
+      // Get contents for all template files in glob
+      const templates = templateFiles.map(filePath =>
+        fs.readFileSync(filePath, {encoding: 'utf8'}),
+      );
+
+      let names: Array<string> = [];
+
+      templates.forEach((template: string) => {
+        // Read file contents
+        const namesInTemplate: Array<string> = Mustache.parse(template)
+          .filter((r: string) => r[0] === 'name')
+          .map((r: Array<string | number>) => r[1]);
+
+        names = [...names, ...namesInTemplate];
+        // const arrays = new Set(Mustache.parse(template).filter((r:string) => r[0] === "#").map((r:Array<string | number>) => r[1]))
+      });
+
+      // Start asking questions
+      const prompts = [...new Set(names)].map((name: string | unknown) => ({
+        type: 'input',
+        name,
+        message: `Please enter ${name}`,
+        default: `${name}`,
+      }));
+      inquirer.prompt(prompts).then((answers: any) => {
+        console.dir(answers);
+      });
     },
-  },
-});
+  );
+};
 
-// Append our box to the screen.
-screen.append(box);
+yargs
+  .command({
+    command: '* [directory]',
+    describe: 'Create a project from template',
+    handler: ({directory}: {directory: string; [key: string]: any}) => {
+      console.log(`Command Arguments`, directory);
+      getParametersInTemplates(directory);
+    },
+  })
+  .help().argv;
 
-// Quit on Escape, q, or Control-C.
-screen.key(['escape', 'q', 'C-c'], function(ch:any, key:any) {
-  return process.exit(0);
-});
-
-//   // Focus our element.
-box.focus();
-
-//   // Render the screen.
-screen.render();
+//inquirer.prompt([{}]).then((answers: any[] | unknown) => {
+//  // Use user feedback for... whatever!!
+//});

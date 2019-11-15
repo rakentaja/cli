@@ -5,10 +5,10 @@ import renderer from "./lib/renderer";
 
 yargs
   .command({
-    command: '* [directory]',
+    command: '* <source> [target]',
     describe: 'Create a project from template',
-    handler: ({directory}: {directory: string; [key: string]: any}) => {
-      renderer(directory);
+    handler: ({source,target}: {source :string, target:string, [key: string]: any}) => {
+      renderer(source, target);
     },
   })
   .help().argv;

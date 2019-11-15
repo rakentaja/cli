@@ -25,30 +25,31 @@ const getFilePaths = (dir: string): Promise<Array<string>> => {
 };
 const getAllNamesInTemplates = async (dir: string): Promise<Array<string>> => {
   const templateFilePaths = await getFilePaths(dir);
-	let names: Array<string> = [];
+  let names: Array<string> = [];
   // Get contents for all template files in glob
-  templateFilePaths.map(
-    filePath => ({
-      template: fs.readFileSync(filePath, {encoding: 'utf8'}),
-      path: filePath,
-    }),
-  )
-  .forEach((templateFile: ITemplateFile) => {
-    // Read file contents
-    const namesInTemplate: Array<string> = Mustache.parse(templateFile.template)
-      .filter((r: string) => r[0] === 'name')
-      .map((r: Array<string | number>) => r[1]);
-    
-		names = [...names, ...namesInTemplate];
-    // const arrays = new Set(Mustache.parse(template).filter((r:string) => r[0] === "#").map((r:Array<string | number>) => r[1]))
-  });
-  
-	return names;
+  templateFilePaths
+    .map(filePath => {
+      return {
+        template: fs.readFileSync(filePath, {encoding: 'utf8'}),
+        path: filePath,
+      };
+    })
+    .forEach((templateFile: ITemplateFile) => {
+      // Read file contents
+      const namesInTemplate: Array<string> = Mustache.parse(
+        templateFile.template,
+      )
+        .filter((r: string) => r[0] === 'name')
+        .map((r: Array<string | number>) => r[1]);
+      names = [...names, ...namesInTemplate];
+      // const arrays = new Set(Mustache.parse(template).filter((r:string) => r[0] === "#").map((r:Array<string | number>) => r[1]))
+    });
+  return names;
 };
 
 // directory is current directory by default
-const renderer = async (dir: string = './') => {
-  const names = await getAllNamesInTemplates(dir);
+const renderer = async (source: string = './', target = './') => {
+  const names = await getAllNamesInTemplates(source);
   // Start asking questions
   const prompts = [...new Set(names)].map((name: string | unknown) => ({
     type: 'input',

@@ -1,4 +1,4 @@
-import {ITemplateFile} from '../types/types';
+import { ITemplateFile } from '../types/types';
 import Mustache from 'mustache';
 import fs from 'fs-extra';
 import shell from 'shelljs';
@@ -15,7 +15,7 @@ const getFilePaths = (dir: string): Promise<Array<string>> => {
   // Get all files under globPath
   const globPath = path.resolve(dir, '**');
   return new Promise((resolve, reject) => {
-    glob(globPath, globOptions, function(
+    glob(globPath, globOptions, function (
       err: any,
       templateFilePaths: Array<string>,
     ) {
@@ -24,17 +24,22 @@ const getFilePaths = (dir: string): Promise<Array<string>> => {
   });
 };
 
-const getFiles = (filePaths: Array<string>): Array<ITemplateFile> => {
-  return filePaths.map(filePath => {
-    const template = fs.readFileSync(filePath, {encoding: 'utf8'});
-
-    return {
-      template,
-      path: filePath,
-      names: getNames(template),
-    };
-  });
-};
+const getFiles = (filePaths: Array<string>): Promise<ITemplateFile[]> => {
+  const promises = filePaths.map<Promise<ITemplateFile>>(filePath => new Promise((resolve, reject) => {
+    fs.readFile(filePath, 'utf8', (err, template) => {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve({
+        template,
+        path: filePath,
+        names: getNames(template),
+      })
+    })
+  }))
+  return Promise.all(promises)
+}
 
 const getNames = (template: string): string[] => {
   return Mustache.parse(template)
@@ -52,30 +57,30 @@ const collectValues = (names: string[]) => {
   }));
   return new Promise(resolve => {
     inquirer.prompt(prompts).then((answers: any) => {
-			resolve(answers)
-		});
+      resolve(answers)
+    });
   });
 };
-const renderFiles = (files:ITemplateFile[],values:object) => {
-	files.forEach((file:ITemplateFile) => {
-		const rendered = Mustache.render(file.template,values)
-		fs.outputFile(file.path,rendered)
-	})
+const renderFiles = (files: ITemplateFile[], values: object) => {
+  files.forEach((file: ITemplateFile) => {
+    const rendered = Mustache.render(file.template, values)
+    fs.outputFile(file.path, rendered)
+  })
 }
 // directory is current directory by default
 const renderer = async (source: string = './', target = './') => {
   // First copy templates
-  shell.cp('-R', source,target)
+  shell.cp('-R', source, target)
   const filePaths = await getFilePaths(target);
-  const files = getFiles(filePaths);
+  const files = await getFiles(filePaths);
   const allKeys = files
     .map((file: ITemplateFile) => file.names)
     .reduce((acc, names) => [...acc, ...names], []);
 
- 	const values = await collectValues(allKeys);
-	// Render files in target folder
-	// @ts-ignore
-	renderFiles(files,values)
+  const values = await collectValues(allKeys);
+  // Render files in target folder
+  // @ts-ignore
+  renderFiles(files, values)
 };
 
 export default renderer;

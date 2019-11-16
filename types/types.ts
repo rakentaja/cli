@@ -1,4 +1,5 @@
 export interface ITemplateFile {
 	template: string;
-	path: string
+	path: string;
+	names: string[]
 }

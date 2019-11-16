@@ -1,10 +1,10 @@
-// import {ITemplateFile} from '../types/types';
+import {ITemplateFile} from '../types/types';
 import Mustache from 'mustache';
-import fs from 'fs';
-// import inquirer from 'inquirer';
+import fs from 'fs-extra';
+import shell from 'shelljs';
+import inquirer from 'inquirer';
 import glob from 'glob';
 import path from 'path';
-
 const globOptions = {
   dot: true,
   ignore: ['**/node_modules/**', '**/.git/**'],
@@ -23,7 +23,8 @@ const getFilePaths = (dir: string): Promise<Array<string>> => {
     });
   });
 };
-const getFiles = (filePaths: Array<string>) => {
+
+const getFiles = (filePaths: Array<string>): Array<ITemplateFile> => {
   return filePaths.map(filePath => {
     const template = fs.readFileSync(filePath, {encoding: 'utf8'});
 
@@ -34,30 +35,47 @@ const getFiles = (filePaths: Array<string>) => {
     };
   });
 };
-const getNames = (template: string): Promise<Array<string>> => {
+
+const getNames = (template: string): string[] => {
   return Mustache.parse(template)
     .filter((r: string) => r[0] === 'name')
     .map((r: Array<string | number>) => r[1]);
 };
 
-// directory is current directory by default
-const renderer = async (source: string = './', target = './') => {
-  const filePaths = await getFilePaths(source);
-  const files = getFiles(filePaths);
-	console.dir(files)
-  
-	// Start asking questions
-  /**
-	const prompts = [...new Set(names)].map((name: string | unknown) => ({
+const collectValues = (names: string[]) => {
+  // Start asking questions
+  const prompts = [...new Set(names)].map((name: string | unknown) => ({
     type: 'input',
     name,
     message: `Please enter ${name}`,
     default: `${name}`,
   }));
-  inquirer.prompt(prompts).then((answers: any) => {
-    console.dir(answers);
+  return new Promise(resolve => {
+    inquirer.prompt(prompts).then((answers: any) => {
+			resolve(answers)
+		});
   });
-	*/
+};
+const renderFiles = (files:ITemplateFile[],values:object) => {
+	files.forEach((file:ITemplateFile) => {
+		const rendered = Mustache.render(file.template,values)
+		fs.outputFile(file.path,rendered)
+	})
+}
+// directory is current directory by default
+const renderer = async (source: string = './', target = './') => {
+  // First copy templates
+  shell.cp('-R', source,target)
+  const filePaths = await getFilePaths(target);
+  const files = getFiles(filePaths);
+  const allKeys = files
+    .map((file: ITemplateFile) => file.names)
+    .reduce((acc, names) => [...acc, ...names], []);
+
+ 	const values = await collectValues(allKeys);
+	// Render files in target folder
+	// @ts-ignore
+	renderFiles(files,values)
 };
 
 export default renderer;

@@ -28,6 +28,11 @@ rakentaja mydir/src
 ```
 ## Roadmap
 
+- Add configuration support with `.rakentajarc`
+- Support `.zip` packages for templates
+- Add git support
+
+
 ## Known Issues
 
 ## Contribution

@@ -1,7 +1,7 @@
-import {ITemplateFile} from '../types/types';
+// import {ITemplateFile} from '../types/types';
 import Mustache from 'mustache';
 import fs from 'fs';
-import inquirer from 'inquirer';
+// import inquirer from 'inquirer';
 import glob from 'glob';
 import path from 'path';
 
@@ -23,35 +23,32 @@ const getFilePaths = (dir: string): Promise<Array<string>> => {
     });
   });
 };
-const getAllNamesInTemplates = async (dir: string): Promise<Array<string>> => {
-  const templateFilePaths = await getFilePaths(dir);
-  let names: Array<string> = [];
-  // Get contents for all template files in glob
-  templateFilePaths
-    .map(filePath => {
-      return {
-        template: fs.readFileSync(filePath, {encoding: 'utf8'}),
-        path: filePath,
-      };
-    })
-    .forEach((templateFile: ITemplateFile) => {
-      // Read file contents
-      const namesInTemplate: Array<string> = Mustache.parse(
-        templateFile.template,
-      )
-        .filter((r: string) => r[0] === 'name')
-        .map((r: Array<string | number>) => r[1]);
-      names = [...names, ...namesInTemplate];
-      // const arrays = new Set(Mustache.parse(template).filter((r:string) => r[0] === "#").map((r:Array<string | number>) => r[1]))
-    });
-  return names;
+const getFiles = (filePaths: Array<string>) => {
+  return filePaths.map(filePath => {
+    const template = fs.readFileSync(filePath, {encoding: 'utf8'});
+
+    return {
+      template,
+      path: filePath,
+      names: getNames(template),
+    };
+  });
+};
+const getNames = (template: string): Promise<Array<string>> => {
+  return Mustache.parse(template)
+    .filter((r: string) => r[0] === 'name')
+    .map((r: Array<string | number>) => r[1]);
 };
 
 // directory is current directory by default
 const renderer = async (source: string = './', target = './') => {
-  const names = await getAllNamesInTemplates(source);
-  // Start asking questions
-  const prompts = [...new Set(names)].map((name: string | unknown) => ({
+  const filePaths = await getFilePaths(source);
+  const files = getFiles(filePaths);
+	console.dir(files)
+  
+	// Start asking questions
+  /**
+	const prompts = [...new Set(names)].map((name: string | unknown) => ({
     type: 'input',
     name,
     message: `Please enter ${name}`,
@@ -60,6 +57,7 @@ const renderer = async (source: string = './', target = './') => {
   inquirer.prompt(prompts).then((answers: any) => {
     console.dir(answers);
   });
+	*/
 };
 
 export default renderer;

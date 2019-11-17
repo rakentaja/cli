@@ -1,32 +1,32 @@
 import path from "path"
 import { ITemplateFile, IRakentajaConfiguration } from '../types/types';
 import fs from 'fs-extra';
-import shell from 'shelljs';
-import getAllFilePathsInDir from "./getAllFilePathsInDir"
-import getTemplateFiles from "./getTemplateFiles"
+import glob from "glob"
 import Mustache from "mustache"
 import promptForValues from "./prompForValues"
+import { config } from "rxjs";
 
 const renderFiles = (files: ITemplateFile[], values: object) => {
 	files.forEach((file: ITemplateFile) => {
 		const rendered = Mustache.render(file.template, values);
-		fs.outputFile(file.path, rendered);
+		fs.writeFileSync(file.targetPath, rendered);
 	});
 };
 // directory is current directory by default
 
-const renderer = async (source: string, target = './') => {
+const renderer = async (sourceDir: string, targetDir = './') => {
 	// Exit if source folder does not exist
-	const sourceFolderExists = fs.existsSync(source);
+	const sourceFolderExists = fs.existsSync(sourceDir);
 	if (!sourceFolderExists) {
-		throw new Error(`No such template folder: ${source}`);
+		throw new Error(`No such template folder: ${sourceDir}`);
 	}
 
 	// Check if config exists
-	const configPath = path.resolve(source, "rakentaja.json")
+	const configPath = path.resolve(sourceDir, "rakentaja.json")
 	let appConfig: IRakentajaConfiguration = {
 		commands: [],
-		keys: {}
+		keys: {},
+		ignore: []
 	}
 	if (fs.existsSync(configPath)) {
 		try {
@@ -35,20 +35,38 @@ const renderer = async (source: string, target = './') => {
 			throw new Error(`Configuration file ${configPath} is not a valid JSON file!`)
 		}
 	}
+	const globOptions = {
+		dot: true,
+		ignore: ['**/.git/**', "**/rakentaja.json", ...appConfig.ignore],
+		nodir: true,
+	};
+	// Check if config exists END
 
-	// First copy templates except rakentaja.json
-	
-	shell.cp('-R', source, target);
-	
-	const filePaths = await getAllFilePathsInDir(target);
-	const files = await getTemplateFiles(filePaths);
+	const files = glob.sync(path.resolve(sourceDir, '**'), globOptions)
+		.map(filePath => {
+			const template = fs.readFileSync(filePath, 'utf8')
+			const targetPath = path.resolve(targetDir, path.relative(sourceDir, filePath))
+			// Copy from source to target
+			fs.ensureFileSync(targetPath)
+			fs.copyFileSync(filePath, targetPath)
+			const keys = Mustache.parse(template)
+				.filter((k: Array<any>) => k[0] === 'name')
+				.map((t: Array<any>) => t[1])
+			return {
+				template,
+				keys,
+				sourcePath: filePath,
+				targetPath
+			}
+		})
+		
 	// Flatten names array
 	const allKeys = files
-		.map((file: ITemplateFile) => file.names)
-		.reduce((acc, names) => [...acc, ...names], []);
-	
+		.map((file: ITemplateFile) => file.keys)
+		.reduce((acc, keys) => [...acc, ...keys], []);
+		
 	const values = (await promptForValues(allKeys, appConfig));
-	
+
 	// Render files in target folder
 	renderFiles(files, values);
 };

@@ -15,6 +15,20 @@ Install globally with `npm i -g @rakentaja/cli` or  `yarn global add @rakentaja/
 
 ## Configuration
 
+Add a `rakentaja.json` to the root of your tempaltes folder having the structure : 
+
+```
+{
+  "commands": [],
+  "keys": {
+    "key": "value"
+  }
+}
+
+```
+
+`commands:` => An array of commands to run after your project is created
+`keys`: => Default values for keys in your template files
 ## Usage
 
 

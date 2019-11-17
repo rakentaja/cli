@@ -27,7 +27,8 @@ const getFilePaths = (dir: string): Promise<Array<string>> => {
 const getFiles = (filePaths: Array<string>): Promise<ITemplateFile[]> => {
   const promises = filePaths.map<Promise<ITemplateFile>>(
     filePath =>
-      new Promise((resolve, reject) => fs.readFile(filePath, 'utf8', (err, template) => {
+      new Promise((resolve, reject) =>
+        fs.readFile(filePath, 'utf8', (err, template) => {
           if (err) {
             reject(err);
             return;
@@ -37,8 +38,8 @@ const getFiles = (filePaths: Array<string>): Promise<ITemplateFile[]> => {
             path: filePath,
             names: getNames(template),
           });
-        })
-			)
+        }),
+      ),
   );
   return Promise.all(promises);
 };
@@ -49,7 +50,11 @@ const getNames = (template: string): string[] => {
     .map((r: Array<string | number>) => r[1]);
 };
 
-const promptUserForValues = (names: string[]) => {
+const promptUserForValues = (names: string[]): Promise<object> => {
+  if (!names || names.length === 0) {
+    return new Promise(resolve => resolve({}));
+  }
+
   // Start asking questions
   const prompts = [...new Set(names)].map((name: string | unknown) => ({
     type: 'input',
@@ -71,6 +76,11 @@ const renderFiles = (files: ITemplateFile[], values: object) => {
 };
 // directory is current directory by default
 const renderer = async (source: string = './', target = './') => {
+	// Exit if source folder does not exist
+	const sourceFolderExists = fs.existsSync(source)
+	if(!sourceFolderExists) {
+		throw new Error(`No such template folder: ${source}`)
+	}
   // First copy templates
   shell.cp('-R', source, target);
   const filePaths = await getFilePaths(target);
@@ -79,9 +89,8 @@ const renderer = async (source: string = './', target = './') => {
     .map((file: ITemplateFile) => file.names)
     .reduce((acc, names) => [...acc, ...names], []);
 
-  const values = await promptUserForValues(allKeys);
+  const values = (await promptUserForValues(allKeys)) as object;
   // Render files in target folder
-  // @ts-ignore
   renderFiles(files, values);
 };
 

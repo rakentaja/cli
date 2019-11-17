@@ -2,16 +2,7 @@
  "name": "@rakentaja/cli",
  "version": "0.1.0",
  "main": "index.ts",
- "license": "MIT",
- "author": {
-     "name": "Tolga SAHIN",
-     "email": "htolgasahin@gmail.com",
-     "url": "https://github.com/kucukkanat"
- },
- "repository": {
-     "type": "git",
-     "url": "https://github.com/rakentaja/cli"
- },
+ "private": false,
  "bin": {
   "rakentaja": "./bin/index.js"
  },
@@ -37,5 +28,15 @@
   "ts-node": "^8.5.0",
   "typescript": "^3.7.2",
   "yargs": "^14.2.0"
- }
+ },
+ "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rakentaja/cli.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rakentaja/cli/issues"
+  },
+  "homepage": "https://github.com/rakentaja/cli#readme"
 }

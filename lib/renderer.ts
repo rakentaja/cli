@@ -49,7 +49,7 @@ const getNames = (template: string): string[] => {
     .map((r: Array<string | number>) => r[1]);
 };
 
-const collectValues = (names: string[]) => {
+const promptUserForValues = (names: string[]) => {
   // Start asking questions
   const prompts = [...new Set(names)].map((name: string | unknown) => ({
     type: 'input',
@@ -79,7 +79,7 @@ const renderer = async (source: string = './', target = './') => {
     .map((file: ITemplateFile) => file.names)
     .reduce((acc, names) => [...acc, ...names], []);
 
-  const values = await collectValues(allKeys);
+  const values = await promptUserForValues(allKeys);
   // Render files in target folder
   // @ts-ignore
   renderFiles(files, values);

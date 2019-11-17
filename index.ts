@@ -12,5 +12,3 @@ yargs
     },
   })
   .help().argv;
-
-

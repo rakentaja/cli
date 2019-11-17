@@ -1,4 +1,4 @@
-# Rakentaja Project Generator
+<center><img src="assets/logo.png" /></center>
 
 ## Motivation
 Are you sick of configuring your projects from scratch over and over again ? 

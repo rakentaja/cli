@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import glob from "glob"
 import Mustache from "mustache"
 import promptForValues from "./prompForValues"
-import { config } from "rxjs";
+
 
 const renderFiles = (files: ITemplateFile[], values: object) => {
 	files.forEach((file: ITemplateFile) => {
@@ -14,6 +14,11 @@ const renderFiles = (files: ITemplateFile[], values: object) => {
 };
 // directory is current directory by default
 
+/**
+ * Renders the template to target directory
+ * @param sourceDir Source directory to collect template files from
+ * @param targetDir Target directory to copy the files and render
+ */
 const renderer = async (sourceDir: string, targetDir = './') => {
 	// Exit if source folder does not exist
 	const sourceFolderExists = fs.existsSync(sourceDir);

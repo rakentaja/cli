@@ -48,13 +48,13 @@ rakentaja myTemplateFolder ./MyProject
 ```
 
 # Roadmap
-
-- Add configuration support with `.rakentajarc`
 - Support `.zip` packages for templates
 - Add git support
 
 
 ## Known Issues
+
+**!!! Git support is not working yet!**
 
 ## Contribution
 

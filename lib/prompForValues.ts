@@ -1,7 +1,12 @@
 import {IRakentajaConfiguration} from "../types/types"
 import inquirer from "inquirer"
 
-export default (keys: string[],appConfig:IRakentajaConfiguration): Promise<{[key:string]: any}> => {
+/**
+ * Prompts the user for all template keys given as an array
+ * @param {string[]} keys Array of keys
+ * @param {IRakentajaConfiguration} appConfig Application config
+ */
+const promptForValues = (keys: string[],appConfig:IRakentajaConfiguration): Promise<{[key:string]: any}> => {
   if (!keys || keys.length === 0) {
     return new Promise(resolve => resolve({}));
   }
@@ -28,3 +33,4 @@ export default (keys: string[],appConfig:IRakentajaConfiguration): Promise<{[key
     });
   });
 }
+export default promptForValues

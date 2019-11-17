@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import renderer from "./lib/renderer";
+import renderer from './lib/renderer';
 
 
 yargs
-  .command({
-    command: '* <source> [target]',
-    describe: 'Create a project from template',
-    handler: ({source,target}: {source :string, target:string, [key: string]: any}) => {
-      renderer(source, target);
-    },
-  })
+  .command('* <source> [target]', 'Create a project from template', yargs => {
+    yargs.positional('source', {
+      describe: 'Source directory or a git URL. If that is a valid git URL, rakentaja will attempt to clone the repository.',
+      type: 'string'
+    })
+    .positional('target', {
+      describe: 'Target directory to generate project',
+      type: 'string',
+      default: './'
+    })
+  }, ({source,target}: any) => renderer(source, target))
   .help().argv;

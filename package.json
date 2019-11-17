@@ -1,15 +1,26 @@
 {
  "name": "@rakentaja/cli",
- "version": "2.0.0",
- "main": "index.js",
+ "version": "0.1.0",
+ "main": "index.ts",
  "license": "MIT",
+ "author": {
+     "name": "Tolga SAHIN",
+     "email": "htolgasahin@gmail.com",
+     "url": "https://github.com/kucukkanat"
+ },
+ "repository": {
+     "type": "git",
+     "url": "https://github.com/rakentaja/cli"
+ },
  "bin": {
   "rakentaja": "./bin/index.js"
  },
+ "keywords": ["config", "project", "generator", "generate", "frontend", "development", "boilerplate", "app", "cli-app", "cli", "scaffold", "stack", "build"],
  "scripts": {
   "dev": "tsc -w",
   "build": "tsc"
  },
+ "files": ["bin/**"],
  "dependencies": {
   "@types/fs-extra": "^8.0.1",
   "@types/glob": "^7.1.1",
@@ -18,7 +29,6 @@
   "@types/node": "^12.12.7",
   "@types/shelljs": "^0.8.6",
   "@types/yargs": "^13.0.3",
-  "blessed": "^0.1.81",
   "fs-extra": "^8.1.0",
   "inquirer": "^7.0.0",
   "mustache": "^3.1.0",

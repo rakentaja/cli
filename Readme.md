@@ -17,16 +17,23 @@ Install globally with `npm i -g @rakentaja/cli` or  `yarn global add @rakentaja/
 
 ## Usage
 
+
+```
+rakentaja <source> [target]
+
+Create a project from template
+
+Options:
+  --version  Show version number                                       [boolean]
+  --help     Show help                                                 [boolean]
+```
+
 Pass the template directory : 
 ```
-rakentaja --anotherOption value --directory mydir/src
+rakentaja myTemplateFolder ./MyProject
 ```
-Pass the template directory with positional arguments
-The first argument is directory by default:
-```
-rakentaja mydir/src
-```
-## Roadmap
+
+# Roadmap
 
 - Add configuration support with `.rakentajarc`
 - Support `.zip` packages for templates

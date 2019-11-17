@@ -36,16 +36,17 @@ const renderer = async (source: string, target = './') => {
 		}
 	}
 
-	// First copy templates
+	// First copy templates except rakentaja.json
+	console.log(source,target)
 	shell.cp('-R', source, target);
-
+	
 	const filePaths = await getAllFilePathsInDir(target);
 	const files = await getTemplateFiles(filePaths);
 	// Flatten names array
 	const allKeys = files
 		.map((file: ITemplateFile) => file.names)
 		.reduce((acc, names) => [...acc, ...names], []);
-
+	
 	const values = (await promptForValues(allKeys, appConfig));
 	
 	// Render files in target folder

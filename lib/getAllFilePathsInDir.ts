@@ -9,9 +9,8 @@ const globOptions = {
 
 const getAllFilesInDir = (dir: string): Promise<Array<string>> => {
   // Get all files under globPath
-  const globPath = path.resolve(dir, '**');
   return new Promise((resolve, reject) => {
-    glob(globPath, globOptions, function(
+    glob(path.resolve(dir, '**'), globOptions, function(
       err: any,
       templateFilePaths: Array<string>,
     ) {

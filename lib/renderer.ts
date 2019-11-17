@@ -37,7 +37,7 @@ const renderer = async (source: string, target = './') => {
 	}
 
 	// First copy templates except rakentaja.json
-	console.log(source,target)
+	
 	shell.cp('-R', source, target);
 	
 	const filePaths = await getAllFilePathsInDir(target);

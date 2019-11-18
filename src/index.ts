@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import renderer from './lib/renderer';
-
+import defaultCommand from "./commands/default";
+console.log('Version : v0.1.0')
 
 yargs
   .command('* <source> [target]', 'Create a project from template', yargs => {
@@ -14,6 +14,6 @@ yargs
       type: 'string',
       default: './'
     })
-  }, ({source,target}: any) => renderer(source, target))
+  }, defaultCommand)
   .version(`0.1.0`)
   .help().argv;

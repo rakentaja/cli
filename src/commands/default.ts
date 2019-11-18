@@ -13,18 +13,17 @@ import renderFiles from "../lib/renderer";
 
 const cloneGitRepoToTemporaryFolder = (url: string): string => {
     const cloneTarget = path.resolve(RAKENTAJA_TEMP, TEMP_CLONE_NAME)
-    // Ensure temp folder exists before cloning
+    // Ensure folders exist before cloning
     fs.ensureDirSync(RAKENTAJA_TEMP)
-    // if it is a url then clone to temporary folder first
+    fs.ensureDirSync(cloneTarget)
+    // Empty target folder
     fs.removeSync(cloneTarget)
+    // if it is a url then clone to temporary folder first
     shell.exec(`git clone ${url} ${cloneTarget}`)    
     return cloneTarget
 }
 
-/**
- * Renders the template to target directory
- * @param userinput {{source:string,target:string}} Source and target directory to collect template files from and to render
- */
+// Renders the template to target directory
 export default async ({ source, target = "./" }: { source: string, target: string }) => {
     let sourceDir = source
     const targetDir = target
@@ -40,8 +39,6 @@ export default async ({ source, target = "./" }: { source: string, target: strin
         }
 
     }
-
-
     // Fetch config if exists, if not return default config
     const appConfig = getConfigFromSourceDir(sourceDir)
     const globOptions = {

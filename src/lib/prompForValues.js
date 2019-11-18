@@ -5,13 +5,15 @@ import inquirer from "inquirer"
  * Prompts the user for all template keys given as an array
  * @param {string[]} keys Array of keys
  * @param {IRakentajaConfiguration} appConfig Application config
+ * @returns Promise<{[key:string]: any}
  */
-const promptForValues = (keys: string[],appConfig:IRakentajaConfiguration): Promise<{[key:string]: any}> => {
+const promptForValues = (keys,appConfig) => {
   if (!keys || keys.length === 0) {
     return new Promise(resolve => resolve({}));
   }
   // Replace default values with the ones existing in config
-  const defaults:{[key:string]:any} = {}
+  /** @type {{[key:string]:any}} */
+  const defaults = {}
   keys.forEach((key) => {
 		if (Object.keys(appConfig.keys).includes(key)) {
       defaults[key] = appConfig.keys[key]
@@ -21,14 +23,14 @@ const promptForValues = (keys: string[],appConfig:IRakentajaConfiguration): Prom
   })
   
   // Start asking questions (Turn it into a Set not to ask twice)
-  const prompts = [...new Set(keys)].map((key: string) => ({
+  const prompts = [...new Set(keys)].map((key) => ({
     type: 'input',
     name:key,
     message: `Please enter ${key}`,
     default: defaults[key],
   }));
   return new Promise(resolve => {
-    inquirer.prompt(prompts).then((answers: any) => {
+    inquirer.prompt(prompts).then((answers) => {
       resolve(answers);
     });
   });

@@ -5,9 +5,13 @@ import glob from "glob"
 import Mustache from "mustache"
 import promptForValues from "./prompForValues"
 
-
-const renderFiles = (files: ITemplateFile[], values: object) => {
-	files.forEach((file: ITemplateFile) => {
+/**
+ * 
+ * @param files {ITemplateFile[]}
+ * @param values {object}
+ */
+const renderFiles = (files, values) => {
+	files.forEach((file) => {
 		const rendered = Mustache.render(file.template, values);
 		fs.writeFileSync(file.targetPath, rendered);
 	});
@@ -16,10 +20,10 @@ const renderFiles = (files: ITemplateFile[], values: object) => {
 
 /**
  * Renders the template to target directory
- * @param sourceDir Source directory to collect template files from
+ * @param sourceDir {string} Source directory to collect template files from
  * @param targetDir Target directory to copy the files and render
  */
-const renderer = async (sourceDir: string, targetDir = './') => {
+const renderer = async (sourceDir, targetDir = './') => {
 	// Exit if source folder does not exist
 	const sourceFolderExists = fs.existsSync(sourceDir);
 	if (!sourceFolderExists) {
@@ -28,7 +32,8 @@ const renderer = async (sourceDir: string, targetDir = './') => {
 
 	// Check if config exists
 	const configPath = path.resolve(sourceDir, "rakentaja.json")
-	let appConfig: IRakentajaConfiguration = {
+	/**  @type IRakentajaConfiguration */
+	let appConfig = {
 		commands: [],
 		keys: {},
 		ignore: []
@@ -46,7 +51,12 @@ const renderer = async (sourceDir: string, targetDir = './') => {
 		nodir: true,
 	};
 	// Check if config exists END
-
+	/** @type {Array<{
+				template:string
+				keys:string[]
+				sourcePath:string
+				targetPath:string
+			}>} */
 	const files = glob.sync(path.resolve(sourceDir, '**'), globOptions)
 		.map(filePath => {
 			const template = fs.readFileSync(filePath, 'utf8')
@@ -54,9 +64,15 @@ const renderer = async (sourceDir: string, targetDir = './') => {
 			// Copy from source to target
 			fs.ensureFileSync(targetPath)
 			fs.copyFileSync(filePath, targetPath)
+			/** @type string[] */
 			const keys = Mustache.parse(template)
-				.filter((k: Array<any>) => k[0] === 'name')
-				.map((t: Array<any>) => t[1])
+			.filter(
+				/** @param {Array<string>} k */
+				(k) => k[0] === 'name')
+			.map(
+				/** @param {Array<string>} t */
+				(t) => t[1]
+			)
 			return {
 				template,
 				keys,
@@ -67,7 +83,7 @@ const renderer = async (sourceDir: string, targetDir = './') => {
 		
 	// Flatten names array
 	const allKeys = files
-		.map((file: ITemplateFile) => file.keys)
+		.map((file) => file.keys)
 		.reduce((acc, keys) => [...acc, ...keys], []);
 		
 	const values = (await promptForValues(allKeys, appConfig));

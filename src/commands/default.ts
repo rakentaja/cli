@@ -7,7 +7,7 @@ import promptForValues from "../lib/prompForValues";
 import shell from "shelljs"
 import { RAKENTAJA_TEMP, TEMP_CLONE_NAME } from "../constants"
 import URL from "url"
-import getConfigFromSourceDir from "../lib/getConfigFromSourceDir";
+import getConfigFromSourceDir from "../lib/getconfig";
 import renderFiles from "../lib/renderer";
 
 

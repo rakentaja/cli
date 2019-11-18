@@ -1,0 +1,7 @@
+{
+  "commands": ["echo 'Hi! I am the example rakentaja template and it worked!'", "say Hello from Rackentaya", "echo 'Now I will create an empty project here'","mkdir project","cd project && npm init -y"],
+  "keys": {
+    "year":"2019"
+  },
+  "ignore": ["**/*.txt"]
+}

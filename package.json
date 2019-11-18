@@ -6,12 +6,28 @@
  "bin": {
   "rakentaja": "./bin/index.js"
  },
- "keywords": ["config", "project", "generator", "generate", "frontend", "development", "boilerplate", "app", "cli-app", "cli", "scaffold", "stack", "build"],
+ "keywords": [
+  "config",
+  "project",
+  "generator",
+  "generate",
+  "frontend",
+  "development",
+  "boilerplate",
+  "app",
+  "cli-app",
+  "cli",
+  "scaffold",
+  "stack",
+  "build"
+ ],
  "scripts": {
   "dev": "tsc -w",
   "build": "tsc"
  },
- "files": ["bin/**"],
+ "files": [
+  "bin/**"
+ ],
  "dependencies": {
   "@types/fs-extra": "^8.0.1",
   "@types/glob": "^7.1.1",
@@ -20,6 +36,7 @@
   "@types/node": "^12.12.7",
   "@types/shelljs": "^0.8.6",
   "@types/yargs": "^13.0.3",
+  "chalk": "^3.0.0",
   "fs-extra": "^8.1.0",
   "inquirer": "^7.0.0",
   "mustache": "^3.1.0",
@@ -30,13 +47,13 @@
   "yargs": "^14.2.0"
  },
  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rakentaja/cli.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/rakentaja/cli/issues"
-  },
-  "homepage": "https://github.com/rakentaja/cli#readme"
+  "type": "git",
+  "url": "git+https://github.com/rakentaja/cli.git"
+ },
+ "author": "",
+ "license": "ISC",
+ "bugs": {
+  "url": "https://github.com/rakentaja/cli/issues"
+ },
+ "homepage": "https://github.com/rakentaja/cli#readme"
 }

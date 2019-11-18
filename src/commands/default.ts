@@ -78,4 +78,10 @@ export default async ({ source, target = "./" }: { source: string, target: strin
 
     // Render files in target folder
     renderFiles(files, values);
+
+    // Run rakentaja commands after rendering files
+    shell.cd(targetDir)
+    appConfig.commands.forEach((command:string) => {
+        shell.exec(command)
+    })
 };

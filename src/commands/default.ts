@@ -69,7 +69,7 @@ export default async ({ source, target }: { source: string, target: string }) =>
     // Run Commands in Rakentaja Config
     config.commands.forEach((command:string) => {
         console.log(chalk.grey(`Running rakentaja command : `), chalk.yellow(command))
-        shell.exec(command)
+        shell.exec(command,{cwd:targetDir})
     })
     console.log(chalk.green(`Render finished!`))
 }

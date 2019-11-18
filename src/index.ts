@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import mini from "./mini"
+import defaultCommand from "./commands/default"
 console.log('Version : v1.2.0')
 
 yargs
@@ -14,6 +14,6 @@ yargs
       type: 'string',
       default: './'
     })
-  }, mini)
+  }, defaultCommand)
   .version(`0.1.0`)
   .help().argv;

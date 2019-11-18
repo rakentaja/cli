@@ -1,84 +1,75 @@
-import { ITemplateFile } from "../types/types";
+import shell from "shelljs"
+import os from "os"
+import URL from "url"
 import path from "path"
-import fs from "fs-extra"
 import glob from "glob"
 import Mustache from "mustache"
-import promptForValues from "../lib/prompForValues";
-import shell from "shelljs"
-import { RAKENTAJA_TEMP, TEMP_CLONE_NAME } from "../constants"
-import URL from "url"
-import getConfigFromSourceDir from "../lib/getconfig";
-import renderFiles from "../lib/renderer";
+import promptForValues from "../lib/prompForValues"
+import getconfig from "../lib/getconfig"
+import fs from "fs-extra"
+import chalk from "chalk"
 
-
-const cloneGitRepoToTemporaryFolder = (url: string): string => {
-    const cloneTarget = path.resolve(RAKENTAJA_TEMP, TEMP_CLONE_NAME)
-    // Ensure folders exist before cloning
-    fs.ensureDirSync(RAKENTAJA_TEMP)
-    fs.ensureDirSync(cloneTarget)
-    // Empty target folder
-    fs.removeSync(cloneTarget)
-    // if it is a url then clone to temporary folder first
-    shell.exec(`git clone ${url} ${cloneTarget}`)    
-    return cloneTarget
-}
-
-// Renders the template to target directory
-export default async ({ source, target = "./" }: { source: string, target: string }) => {
-    let sourceDir = source
-    const targetDir = target
-
-    // Clone to temporary path if {source} is a valid url
+export default async ({ source, target }: { source: string, target: string }) => {
+    // Keep first working directory path
+    const WORKING_DIR = process.cwd()
+    let sourceDir = path.resolve(source)
+    let targetDir = path.resolve(WORKING_DIR,target)
+    
+    // If git url
     if (URL.parse(source).hostname) {
-        sourceDir = cloneGitRepoToTemporaryFolder(source)
-    } else {
-        // Exit if source folder does not exist
-        const sourceFolderExists = fs.existsSync(sourceDir);
-        if (!sourceFolderExists) {
-            throw new Error(`No such template folder: ${sourceDir}`);
+        if (!shell.which('git')) {
+            shell.echo('Sorry, you need git installed! Visit https://git-scm.com/book/en/v2/Getting-Started-Installing-Git');
+            process.exit(1)
         }
 
-    }
-    // Fetch config if exists, if not return default config
-    const appConfig = getConfigFromSourceDir(sourceDir)
-    const globOptions = {
-        dot: true,
-        ignore: ['**/.git/**', "**/rakentaja.json", ...appConfig.ignore],
-        nodir: true,
-    };
-    // Config END
+        const cloneTarget = path.resolve(os.homedir(), ".rakentaja/temp")
+        // Create folders until cloneTarget
+        shell.mkdir('-p', cloneTarget)
+        shell.rm('-rf', cloneTarget)
+        shell.exec(`git clone ${source} ${cloneTarget}`)
+        sourceDir = cloneTarget
+    } 
 
-    const files = glob.sync(path.resolve(sourceDir, '**'), globOptions)
-        .map((filePath: string) => {
-            const template = fs.readFileSync(filePath, 'utf8')
-            const targetPath = path.resolve(targetDir, path.relative(sourceDir, filePath))
-            // Copy from source to target
-            fs.ensureFileSync(targetPath)
-            fs.copyFileSync(filePath, targetPath)
-            const keys = Mustache.parse(template)
-                .filter((k: Array<any>) => k[0] === 'name')
-                .map((t: Array<any>) => t[1])
-            return {
-                template,
-                keys,
-                sourcePath: filePath,
-                targetPath
-            }
-        })
+    /*********************************************
+     *  ========= START ACTIONS HERE =========
+    **********************************************/
+    
+    // Get config
+    const config = getconfig(sourceDir)
 
-    // Flatten names array
-    const allKeys = files
-        .map((file: ITemplateFile) => file.keys)
-        .reduce((acc, keys) => [...acc, ...keys], []);
+    // All files in source folder
+    const files:string[] = glob.sync(`**`, { dot: true, cwd: sourceDir, nodir: true, ignore: ["**/.git/**","**/rakentaja.json", ...config.ignore] })
+    
+    // All file contents
+    shell.cd(sourceDir)
+    const allFileContents = shell.cat(files).stdout
+    const keys = Mustache.parse(allFileContents)
+        .filter((token: [...any[]]) => token[0] === "name")
+        .reduce((acc: [], curr: any) => [...acc, curr[1]], [])
 
-    const values = (await promptForValues(allKeys, appConfig));
+    const keyValues = await promptForValues(keys, config)
 
-    // Render files in target folder
-    renderFiles(files, values);
-
-    // Run rakentaja commands after rendering files
-    shell.cd(targetDir)
-    appConfig.commands.forEach((command:string) => {
+    // Copy files to target
+    shell.mkdir('-p',path.resolve(targetDir))
+    
+    // Copy glob result
+    files.forEach((filePath:string) => {
+        const targetFilePath = path.resolve(targetDir,filePath)
+        fs.ensureFileSync(targetFilePath)
+        shell.cp(filePath,targetFilePath)
+    })
+    
+    // Render and write back files
+    glob.sync(`**`, { dot: true, cwd: targetDir, nodir: true })
+    .forEach((filePathInTarget:string) => {
+        const template = fs.readFileSync(filePathInTarget, 'utf8')
+        const rendered = Mustache.render(template, keyValues)
+        fs.writeFileSync(path.resolve(targetDir,filePathInTarget),rendered)
+    })
+    // Run Commands in Rakentaja Config
+    config.commands.forEach((command:string) => {
+        console.log(chalk.grey(`Running rakentaja command : `), chalk.yellow(command))
         shell.exec(command)
     })
-};
+    console.log(chalk.green(`Render finished!`))
+}

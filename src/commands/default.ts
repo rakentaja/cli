@@ -28,7 +28,9 @@ export default async ({ source, target }: { source: string, target: string }) =>
         shell.rm('-rf', cloneTarget)
         shell.exec(`git clone ${source} ${cloneTarget}`)
         sourceDir = cloneTarget
-    } 
+    } else if(!fs.existsSync(sourceDir)) {
+        throw new Error(chalk.red(`Folder ${sourceDir} does not exist!`))
+    }
 
     /*********************************************
      *  ========= START ACTIONS HERE =========

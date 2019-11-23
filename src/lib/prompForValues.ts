@@ -3,6 +3,8 @@ import inquirer from "inquirer"
 
 /**
  * Prompts the user for all template keys given as an array
+ * promptForValues needs to return a promise since inquirer is asynchronous
+ * 
  * @param {string[]} keys Array of keys
  * @param {IRakentajaConfiguration} appConfig Application config
  */

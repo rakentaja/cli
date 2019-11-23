@@ -1,9 +1,10 @@
 import { IRakentajaConfiguration } from "../types/types";
 import path from "path"
 import fs from "fs-extra"
+import { RAKENTAJA_CONFIG } from "../constants";
 
 export default (sourceDir:string):IRakentajaConfiguration => {
-    const configPath = path.resolve(sourceDir, "rakentaja.json")
+    const configPath = path.resolve(sourceDir, RAKENTAJA_CONFIG)
     let appConfig: IRakentajaConfiguration = {
         commands: [],
         keys: {},

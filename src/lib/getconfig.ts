@@ -12,7 +12,7 @@ export default (sourceDir:string):IRakentajaConfiguration => {
     }
     if (fs.existsSync(configPath)) {
         try {
-            appConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'))
+            appConfig = {...appConfig,...JSON.parse(fs.readFileSync(configPath, 'utf8'))}
         } catch (err) {
             throw new Error(`Configuration file ${configPath} is not a valid JSON file!`)
         }

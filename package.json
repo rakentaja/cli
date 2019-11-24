@@ -1,6 +1,6 @@
 {
  "name": "@rakentaja/cli",
- "version": "1.2.2",
+ "version": "1.2.5",
  "main": "index.ts",
  "private": false,
  "bin": {
